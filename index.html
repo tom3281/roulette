@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0a0a0c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ROULETTE — 飲み</title>
+<style>
+:root {
+  --bg-0: #08080a;
+  --bg-1: #16161a;
+  --bg-2: #2a2a30;
+  --steel-0: #4a4a52;
+  --steel-1: #8a8a92;
+  --steel-2: #c8c8d0;
+  --blood: #e0142a;
+  --blood-glow: #ff2a3e;
+  --bone: #e8e4d8;
+  --dim: #6a6a72;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+[hidden] { display: none !important; }
+
+body {
+  font-family: "SF Mono", "Menlo", "Consolas", "Courier New", monospace;
+  background: radial-gradient(ellipse at 50% 30%, #1a1a20 0%, #0a0a0c 60%, #000 100%);
+  color: var(--bone);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  letter-spacing: 0.08em;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg,
+      transparent 0, transparent 2px,
+      rgba(255,255,255,0.012) 2px, rgba(255,255,255,0.012) 3px);
+  z-index: 1;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%);
+  z-index: 1;
+}
+
+#app {
+  position: relative;
+  z-index: 2;
+  height: 100vh;
+  height: 100dvh;
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Header ─── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 8px;
+  flex-shrink: 0;
+}
+.brand {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  color: var(--steel-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--blood);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--blood-glow);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--steel-0);
+  background: rgba(255,255,255,0.02);
+  border-radius: 50%;
+  color: var(--steel-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+.icon-btn:active {
+  transform: scale(0.94);
+  background: rgba(255,255,255,0.06);
+}
+
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px 24px;
+  position: relative;
+}
+
+/* ─── Setup ─── */
+.setup-title {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--bone);
+  text-shadow: 0 0 24px rgba(224,20,42,0.4);
+  margin-bottom: 8px;
+}
+.setup-sub {
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 0.4em;
+  margin-bottom: 44px;
+}
+.setup-block { width: 100%; max-width: 320px; margin-bottom: 32px; }
+.setup-label {
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  color: var(--dim);
+  margin-bottom: 12px;
+  text-align: center;
+}
+.picker-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.pick {
+  flex: 0 0 56px;
+  height: 48px;
+  border-radius: 4px;
+  border: 1.5px solid var(--steel-0);
+  background: var(--bg-1);
+  color: var(--steel-1);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.pick:active { transform: scale(0.94); }
+.pick.active {
+  background: linear-gradient(180deg, rgba(224,20,42,0.15), rgba(224,20,42,0.05));
+  border-color: var(--blood);
+  color: var(--bone);
+  box-shadow: 0 0 16px rgba(224,20,42,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.btn-primary {
+  width: 100%;
+  max-width: 320px;
+  padding: 18px;
+  background: linear-gradient(180deg, var(--blood-glow), var(--blood) 60%, #8c0010);
+  border: none;
+  border-radius: 4px;
+  color: var(--bone);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  cursor: pointer;
+  box-shadow:
+    0 0 24px rgba(224,20,42,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    inset 0 -2px 0 rgba(0,0,0,0.3);
+  transition: all 0.15s;
+}
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 0 12px rgba(224,20,42,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+/* ─── Game ─── */
+.status {
+  text-align: center;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.stat-label {
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  color: var(--dim);
+}
+.stat-val {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--bone);
+  font-variant-numeric: tabular-nums;
+}
+.stat-val.hot { color: var(--blood-glow); text-shadow: 0 0 12px rgba(224,20,42,0.5); }
+.stat-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--steel-0);
+}
+
+/* board */
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 1;
+  perspective: 1200px;
+}
+
+.tile {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+.tile.flipped { transform: rotateY(180deg); }
+.tile.locked { cursor: default; }
+.tile:not(.flipped):not(.locked):active { transform: scale(0.95); }
+.tile.shuffle {
+  animation: shuffle 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes shuffle {
+  0% { transform: rotateY(180deg) scale(1); }
+  50% { transform: rotateY(90deg) scale(0.9); }
+  100% { transform: rotateY(0deg) scale(1); }
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+
+/* face-down (cover) */
+.cover {
+  background:
+    linear-gradient(135deg, #2a2a30 0%, #1a1a20 50%, #0a0a0c 100%);
+  border: 1px solid var(--steel-0);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.6),
+    0 4px 12px rgba(0,0,0,0.5);
+}
+.cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg,
+      transparent 0, transparent 8px,
+      rgba(255,255,255,0.02) 8px, rgba(255,255,255,0.02) 9px);
+  pointer-events: none;
+}
+.cover-mark {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--blood);
+  box-shadow:
+    0 0 12px var(--blood-glow),
+    inset 0 1px 1px rgba(255,255,255,0.4);
+  position: relative;
+  z-index: 1;
+}
+.cover-mark::before, .cover-mark::after {
+  content: "";
+  position: absolute;
+  background: var(--blood);
+  opacity: 0.3;
+}
+.cover-mark::before {
+  top: 50%; left: -16px; right: -16px;
+  height: 1px;
+  transform: translateY(-50%);
+}
+.cover-mark::after {
+  left: 50%; top: -16px; bottom: -16px;
+  width: 1px;
+  transform: translateX(-50%);
+}
+
+/* revealed (back) */
+.reveal {
+  transform: rotateY(180deg);
+}
+.reveal.safe {
+  background: linear-gradient(135deg, #1a1a20 0%, #14141a 50%, #08080c 100%);
+  border: 1px solid #2a2a30;
+  color: var(--dim);
+  font-size: 24px;
+  font-weight: 300;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);
+}
+.reveal.hit {
+  background:
+    radial-gradient(circle at 35% 30%, #ff5e6e 0%, var(--blood) 40%, #6a0010 100%);
+  border: 1px solid var(--blood-glow);
+  color: var(--bone);
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 0;
+  box-shadow:
+    0 0 32px var(--blood-glow),
+    inset 0 1px 2px rgba(255,255,255,0.4),
+    inset 0 -2px 4px rgba(0,0,0,0.4);
+  text-shadow: 0 0 16px rgba(0,0,0,0.5);
+}
+
+/* hint at bottom */
+.hint {
+  margin-top: 28px;
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  color: var(--dim);
+  text-align: center;
+}
+
+/* ─── BANG overlay ─── */
+.bang-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(224,20,42,0.5) 0%, rgba(50,0,0,0.96) 55%, #000 100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+  cursor: pointer;
+  padding: 24px;
+}
+.bang-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.bang-label {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.32em;
+  color: var(--blood-glow);
+  text-shadow: 0 0 24px currentColor;
+  margin-bottom: 28px;
+  animation: shake 0.5s;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+.bang-msg {
+  font-family: -apple-system, BlinkMacSystemFont, "Yu Gothic UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--bone);
+  text-align: center;
+  line-height: 1.1;
+  text-shadow: 0 0 32px rgba(255,255,255,0.4);
+  transform: scale(0.7);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  margin-bottom: 40px;
+}
+.bang-overlay.show .bang-msg { transform: scale(1); }
+.bang-hint {
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  color: var(--bone);
+  opacity: 0.6;
+  animation: blink 1.4s ease-in-out infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+/* flash */
+.flash {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  background: var(--bone);
+  opacity: 0;
+  pointer-events: none;
+}
+.flash.fire {
+  animation: flash 0.18s;
+}
+@keyframes flash {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (max-height: 700px) {
+  .setup-sub { margin-bottom: 24px; }
+  .setup-block { margin-bottom: 20px; }
+  .board { max-width: 280px; gap: 10px; }
+  .status { margin-bottom: 16px; }
+  .hint { margin-top: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header class="header">
+    <div class="brand">ROULETTE</div>
+    <button class="icon-btn" id="resetBtn" aria-label="reset" hidden>↻</button>
+  </header>
+
+  <!-- SETUP -->
+  <section class="screen" id="setupScreen">
+    <h1 class="setup-title">ROULETTE</h1>
+    <div class="setup-sub">FLIP &amp; PRAY</div>
+
+    <div class="setup-block">
+      <div class="setup-label">TILES</div>
+      <div class="picker-row" id="tilesPicker"></div>
+    </div>
+
+    <div class="setup-block">
+      <div class="setup-label">BOMBS</div>
+      <div class="picker-row" id="bombsPicker"></div>
+    </div>
+
+    <button class="btn-primary" id="startBtn">SHUFFLE &amp; START</button>
+  </section>
+
+  <!-- GAME -->
+  <section class="screen" id="gameScreen" hidden>
+    <div class="status">
+      <div class="stat">
+        <div class="stat-label">SAFE</div>
+        <div class="stat-val" id="safeVal">—</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <div class="stat-label">BOMB</div>
+        <div class="stat-val hot" id="bombVal">—</div>
+      </div>
+    </div>
+
+    <div class="board" id="board"></div>
+
+    <div class="hint">TAP A TILE</div>
+  </section>
+</div>
+
+<div class="flash" id="flash"></div>
+<div class="bang-overlay" id="bangOverlay">
+  <div class="bang-label">BANG</div>
+  <div class="bang-msg">飲んで<br>ください</div>
+  <div class="bang-hint">TAP TO CONTINUE</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const TILE_OPTIONS = [9, 12, 16];
+  const BOMB_OPTIONS = [1, 2, 3, 4];
+
+  const $ = (id) => document.getElementById(id);
+  const setupScreen = $('setupScreen');
+  const gameScreen  = $('gameScreen');
+  const tilesPicker = $('tilesPicker');
+  const bombsPicker = $('bombsPicker');
+  const startBtn    = $('startBtn');
+  const resetBtn    = $('resetBtn');
+  const board       = $('board');
+  const safeVal     = $('safeVal');
+  const bombVal     = $('bombVal');
+  const flashEl     = $('flash');
+  const bangOverlay = $('bangOverlay');
+
+  let tilesCount = 9;
+  let bombsCount = 1;
+  let bombs = new Set();   // indices that are bombs
+  let revealed = new Set();
+  let busy = false;
+
+  // ─── Audio (Web Audio API, no files) ───
+  let audioCtx = null;
+  const ensureAudio = () => {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch (e) { audioCtx = null; }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  };
+
+  const playFlip = () => {
+    const ctx = ensureAudio(); if (!ctx) return;
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(420, t);
+    osc.frequency.exponentialRampToValueAtTime(180, t + 0.06);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.12, t + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t); osc.stop(t + 0.12);
+  };
+
+  const playSafe = () => {
+    const ctx = ensureAudio(); if (!ctx) return;
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(660, t);
+    osc.frequency.exponentialRampToValueAtTime(880, t + 0.12);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.1, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t); osc.stop(t + 0.2);
+  };
+
+  const playBang = () => {
+    const ctx = ensureAudio(); if (!ctx) return;
+    const t = ctx.currentTime;
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 2);
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.6, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1200, t);
+    filter.frequency.exponentialRampToValueAtTime(200, t + 0.3);
+    noise.connect(filter).connect(noiseGain).connect(ctx.destination);
+    noise.start(t);
+
+    const osc = ctx.createOscillator();
+    const og = ctx.createGain();
+    osc.frequency.setValueAtTime(120, t);
+    osc.frequency.exponentialRampToValueAtTime(30, t + 0.2);
+    og.gain.setValueAtTime(0.5, t);
+    og.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+    osc.connect(og).connect(ctx.destination);
+    osc.start(t); osc.stop(t + 0.3);
+  };
+
+  const playShuffle = () => {
+    const ctx = ensureAudio(); if (!ctx) return;
+    const t = ctx.currentTime;
+    for (let i = 0; i < 6; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const start = t + i * 0.05;
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(200 + Math.random() * 400, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.06, start + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.04);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(start); osc.stop(start + 0.05);
+    }
+  };
+
+  const vibrate = (p) => { if (navigator.vibrate) try { navigator.vibrate(p); } catch(e) {} };
+
+  // ─── Pickers ───
+  const renderPicker = (host, options, current, onPick) => {
+    host.innerHTML = '';
+    options.forEach((v) => {
+      const b = document.createElement('button');
+      b.className = 'pick' + (v === current ? ' active' : '');
+      b.textContent = v;
+      b.addEventListener('click', () => {
+        ensureAudio();
+        playFlip();
+        onPick(v);
+      });
+      host.appendChild(b);
+    });
+  };
+
+  const renderPickers = () => {
+    renderPicker(tilesPicker, TILE_OPTIONS, tilesCount, (v) => {
+      tilesCount = v;
+      // clamp bombs to tiles - 1
+      if (bombsCount > tilesCount - 1) bombsCount = tilesCount - 1;
+      renderPickers();
+    });
+    const bombOpts = BOMB_OPTIONS.filter(b => b < tilesCount);
+    renderPicker(bombsPicker, bombOpts, bombsCount, (v) => {
+      bombsCount = v;
+      renderPickers();
+    });
+  };
+
+  // ─── Board ───
+  const buildBoard = () => {
+    board.innerHTML = '';
+    const cols = tilesCount === 16 ? 4 : (tilesCount === 12 ? 4 : 3);
+    const rows = Math.ceil(tilesCount / cols);
+    board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    board.style.gridTemplateRows    = `repeat(${rows}, 1fr)`;
+    for (let i = 0; i < tilesCount; i++) {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.dataset.i = i;
+      tile.innerHTML = `
+        <div class="face cover"><div class="cover-mark"></div></div>
+        <div class="face reveal"></div>
+      `;
+      tile.addEventListener('click', () => onTileTap(i));
+      board.appendChild(tile);
+    }
+  };
+
+  const placeBombs = () => {
+    bombs.clear();
+    revealed.clear();
+    const indices = Array.from({length: tilesCount}, (_, i) => i);
+    for (let i = 0; i < bombsCount; i++) {
+      const j = Math.floor(Math.random() * indices.length);
+      bombs.add(indices.splice(j, 1)[0]);
+    }
+  };
+
+  const updateStats = () => {
+    const safeRemaining = (tilesCount - bombsCount) - [...revealed].filter(i => !bombs.has(i)).length;
+    const bombRemaining = bombsCount - [...revealed].filter(i => bombs.has(i)).length;
+    safeVal.textContent = safeRemaining;
+    bombVal.textContent = bombRemaining;
+  };
+
+  const startGame = () => {
+    ensureAudio();
+    placeBombs();
+    setupScreen.hidden = true;
+    gameScreen.hidden = false;
+    resetBtn.hidden = false;
+    buildBoard();
+    updateStats();
+    // shuffle anim: tiles already face-down, just buzz + sound
+    playShuffle();
+    vibrate(50);
+  };
+
+  const resetBoard = () => {
+    placeBombs();
+    // flip all back face-down with stagger
+    const tiles = board.querySelectorAll('.tile');
+    tiles.forEach((t, i) => {
+      const reveal = t.querySelector('.reveal');
+      reveal.classList.remove('safe', 'hit');
+      reveal.textContent = '';
+      t.classList.remove('flipped', 'locked');
+      t.style.transitionDelay = (i * 30) + 'ms';
+    });
+    setTimeout(() => {
+      tiles.forEach(t => t.style.transitionDelay = '');
+    }, 800);
+    updateStats();
+    playShuffle();
+    vibrate(50);
+  };
+
+  const onTileTap = (i) => {
+    if (busy) return;
+    const tile = board.querySelector(`.tile[data-i="${i}"]`);
+    if (!tile || tile.classList.contains('flipped') || tile.classList.contains('locked')) return;
+
+    busy = true;
+    ensureAudio();
+    const isBomb = bombs.has(i);
+    const reveal = tile.querySelector('.reveal');
+
+    if (isBomb) {
+      reveal.classList.add('hit');
+      reveal.textContent = '×';
+    } else {
+      reveal.classList.add('safe');
+      reveal.textContent = '○';
+    }
+
+    tile.classList.add('flipped', 'locked');
+    revealed.add(i);
+    playFlip();
+    vibrate(20);
+
+    // mid-flip moment to play outcome cue
+    setTimeout(() => {
+      if (isBomb) {
+        flashEl.classList.add('fire');
+        setTimeout(() => flashEl.classList.remove('fire'), 200);
+        playBang();
+        vibrate([0, 80, 40, 200]);
+      } else {
+        playSafe();
+      }
+    }, 350);
+
+    setTimeout(() => {
+      updateStats();
+      if (isBomb) {
+        bangOverlay.classList.add('show');
+        return;
+      }
+      busy = false;
+      // auto-reshuffle when all safe tiles are gone
+      const safesRevealed = revealed.size;
+      const safesTotal    = tilesCount - bombsCount;
+      if (safesRevealed >= safesTotal) {
+        setTimeout(resetBoard, 1200);
+      }
+    }, 720);
+  };
+
+  const dismissBang = () => {
+    if (!bangOverlay.classList.contains('show')) return;
+    bangOverlay.classList.remove('show');
+    busy = false;
+    resetBoard();
+  };
+
+  // ─── Wire up ───
+  startBtn.addEventListener('click', () => { ensureAudio(); startGame(); });
+  resetBtn.addEventListener('click', () => {
+    gameScreen.hidden = true;
+    setupScreen.hidden = false;
+    resetBtn.hidden = true;
+  });
+  bangOverlay.addEventListener('click', dismissBang);
+
+  document.addEventListener('touchstart', ensureAudio, { once: true, passive: true });
+  document.addEventListener('click', ensureAudio, { once: true });
+
+  renderPickers();
+})();
+</script>
+
+</body>
+</html>
