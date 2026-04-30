@@ -254,7 +254,6 @@ body::after {
   width: 100%;
   max-width: 340px;
   aspect-ratio: 1;
-  perspective: 1200px;
 }
 
 .tile {
@@ -262,19 +261,28 @@ body::after {
   width: 100%;
   height: 100%;
   cursor: pointer;
-  transform-style: preserve-3d;
-  transition: transform 0.7s cubic-bezier(0.34, 1.2, 0.64, 1);
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
 }
-.tile.flipped { transform: rotateY(180deg); }
 .tile.locked { cursor: default; }
-.tile:not(.flipped):not(.locked):active { transform: scale(0.95); }
-.tile.shuffle {
-  animation: shuffle 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+.tile-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.34, 1.2, 0.64, 1);
+  will-change: transform;
 }
-@keyframes shuffle {
-  0% { transform: rotateY(180deg) scale(1); }
-  50% { transform: rotateY(90deg) scale(0.9); }
-  100% { transform: rotateY(0deg) scale(1); }
+.tile.flipped .tile-inner {
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+}
+.tile:not(.flipped):not(.locked):active .tile-inner {
+  transform: scale(0.95);
+  -webkit-transform: scale(0.95);
+  transition: transform 0.1s ease-out;
 }
 
 .face {
@@ -673,8 +681,10 @@ body::after {
       tile.className = 'tile';
       tile.dataset.i = i;
       tile.innerHTML = `
-        <div class="face cover"><div class="cover-mark"></div></div>
-        <div class="face reveal"></div>
+        <div class="tile-inner">
+          <div class="face cover"><div class="cover-mark"></div></div>
+          <div class="face reveal"></div>
+        </div>
       `;
       tile.addEventListener('click', () => onTileTap(i));
       board.appendChild(tile);
@@ -720,10 +730,14 @@ body::after {
       reveal.classList.remove('safe', 'hit');
       reveal.textContent = '';
       t.classList.remove('flipped', 'locked');
-      t.style.transitionDelay = (i * 30) + 'ms';
+      const inner = t.querySelector('.tile-inner');
+      if (inner) inner.style.transitionDelay = (i * 30) + 'ms';
     });
     setTimeout(() => {
-      tiles.forEach(t => t.style.transitionDelay = '');
+      tiles.forEach(t => {
+        const inner = t.querySelector('.tile-inner');
+        if (inner) inner.style.transitionDelay = '';
+      });
     }, 800);
     updateStats();
     playShuffle();
