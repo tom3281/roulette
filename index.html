@@ -317,34 +317,6 @@ body::after {
       rgba(255,255,255,0.02) 8px, rgba(255,255,255,0.02) 9px);
   pointer-events: none;
 }
-.cover-mark {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--blood);
-  box-shadow:
-    0 0 12px var(--blood-glow),
-    inset 0 1px 1px rgba(255,255,255,0.4);
-  position: relative;
-  z-index: 1;
-}
-.cover-mark::before, .cover-mark::after {
-  content: "";
-  position: absolute;
-  background: var(--blood);
-  opacity: 0.3;
-}
-.cover-mark::before {
-  top: 50%; left: -16px; right: -16px;
-  height: 1px;
-  transform: translateY(-50%);
-}
-.cover-mark::after {
-  left: 50%; top: -16px; bottom: -16px;
-  width: 1px;
-  transform: translateX(-50%);
-}
-
 /* revealed (back) */
 .reveal {
   transform: rotateY(180deg);
@@ -682,7 +654,7 @@ body::after {
       tile.dataset.i = i;
       tile.innerHTML = `
         <div class="tile-inner">
-          <div class="face cover"><div class="cover-mark"></div></div>
+          <div class="face cover"></div>
           <div class="face reveal"></div>
         </div>
       `;
