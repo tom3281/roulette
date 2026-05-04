@@ -1,0 +1,24 @@
+# Files Cloudflare Workers Assets must NOT serve.
+# Without this, `assets.directory: "."` uploads everything in the repo,
+# including .git/ (history + author email). Probe /.git/config to verify.
+
+.git
+.git/**
+.gitignore
+.github
+.github/**
+.wrangler
+.wrangler/**
+.vscode
+.vscode/**
+.idea
+.idea/**
+.DS_Store
+Thumbs.db
+node_modules
+node_modules/**
+README.md
+package.json
+package-lock.json
+wrangler.jsonc
+wrangler.toml
